@@ -31,14 +31,15 @@ import json
 import logging
 
 import cfclient
-from PyQt4.QtCore import QThread, SIGNAL
-from PyQt4.QtCore import QTimer
-from PyQt4.QtCore import pyqtSignal
-from PyQt4.QtGui import QMessageBox
+from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QMessageBox
 from cfclient.utils.config_manager import ConfigManager
-from PyQt4 import Qt
-from PyQt4 import QtGui
-from PyQt4 import uic
+from PyQt5 import Qt
+from PyQt5 import QtGui
+from PyQt5 import uic
+from PyQt5.Qt import *  # noqa
 
 __author__ = 'Bitcraze AB'
 __all__ = ['InputConfigDialogue']
@@ -50,7 +51,7 @@ logger = logging.getLogger(__name__)
 )
 
 
-class InputConfigDialogue(QtGui.QWidget, inputconfig_widget_class):
+class InputConfigDialogue(QWidget, inputconfig_widget_class):
 
     def __init__(self, joystickReader, *args):
         super(InputConfigDialogue, self).__init__(*args)
@@ -448,7 +449,7 @@ class DeviceReader(QThread):
         self._read_timer = QTimer()
         self._read_timer.setInterval(25)
 
-        self.connect(self._read_timer, SIGNAL("timeout()"), self._read_input)
+        self.start(self._read_timer, SIGNAL("timeout()"), self._read_input)
 
     def stop_reading(self):
         """Stop polling data"""

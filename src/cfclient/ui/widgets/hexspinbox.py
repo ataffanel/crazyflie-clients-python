@@ -30,17 +30,17 @@ This class provides a spin box with hexadecimal numbers and arbitrarily length
 (i.e. not limited by 32 bit).
 """
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import QAbstractSpinBox
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtWidgets import QSpinBox
 
 __author__ = 'Bitcraze AB'
 __all__ = ['HexSpinBox']
 
 
-class HexSpinBox(QAbstractSpinBox):
+class HexSpinBox(QSpinBox):
 
     def __init__(self, *args):
-        QAbstractSpinBox.__init__(self, *args)
+        QSpinBox.__init__(self, *args)
         regexp = QtCore.QRegExp('^0x[0-9A-Fa-f]{1,10}$')
         self.validator = QtGui.QRegExpValidator(regexp)
         self._value = 0
@@ -66,5 +66,5 @@ class HexSpinBox(QAbstractSpinBox):
         self.setValue(self._value + steps)
 
     def stepEnabled(self):
-        return (QAbstractSpinBox.StepUpEnabled |
-                QAbstractSpinBox.StepDownEnabled)
+        return (QSpinBox.StepUpEnabled |
+                QSpinBox.StepDownEnabled)

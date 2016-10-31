@@ -45,21 +45,22 @@ from cfclient.utils.zmq_param import ZMQParamAccess
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from cflib.crazyflie.mem import MemoryElement
-from PyQt4 import QtGui
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSignal
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtCore import QDir
-from PyQt4.QtCore import QThread
-from PyQt4.QtCore import QUrl
-from PyQt4.QtCore import QTimer
-from PyQt4.QtGui import QAction
-from PyQt4.QtGui import QActionGroup
-from PyQt4.QtGui import QDesktopServices
-from PyQt4.QtGui import QLabel
-from PyQt4.QtGui import QMenu
-from PyQt4.QtGui import QMessageBox
-from PyQt4.QtGui import QTreeView, QTreeWidget, QWidget, QTextEdit
+from PyQt5 import QtGui
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import QDir
+from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QActionGroup
+from PyQt5.QtGui import QDesktopServices
+from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QMenu
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QTreeView, QTreeWidget, QWidget, QTextEdit
+from PyQt5.Qt import *  # noqa
 
 from .dialogs.cf1config import Cf1ConfigDialog
 from .dialogs.cf2config import Cf2ConfigDialog
@@ -78,7 +79,7 @@ INTERFACE_PROMPT_TEXT = 'Select an interface'
                                             '/ui/main.ui'))
 
 
-class MyDockWidget(QtGui.QDockWidget):
+class MyDockWidget(QDockWidget):
     closed = pyqtSignal()
 
     def closeEvent(self, event):
@@ -115,7 +116,7 @@ def progressbar_stylesheet(color):
     """
 
 
-class MainUI(QtGui.QMainWindow, main_window_class):
+class MainUI(QMainWindow, main_window_class):
     connectionLostSignal = pyqtSignal(str, str)
     connectionInitiatedSignal = pyqtSignal(str)
     batteryUpdatedSignal = pyqtSignal(int, object, object)
@@ -293,7 +294,7 @@ class MainUI(QtGui.QMainWindow, main_window_class):
 
         # Loading toolboxes (A bit of magic for a lot of automatic)
         self.toolboxes = []
-        self.toolboxesMenuItem.setMenu(QtGui.QMenu())
+        self.toolboxesMenuItem.setMenu(QMenu())
         for t_class in cfclient.ui.toolboxes.toolboxes:
             toolbox = t_class(cfclient.ui.pluginhelper)
             dockToolbox = MyDockWidget(toolbox.getName())
@@ -301,7 +302,7 @@ class MainUI(QtGui.QMainWindow, main_window_class):
             self.toolboxes += [dockToolbox, ]
 
             # Add menu item for the toolbox
-            item = QtGui.QAction(toolbox.getName(), self)
+            item = QAction(toolbox.getName(), self)
             item.setCheckable(True)
             item.triggered.connect(self.toggleToolbox)
             self.toolboxesMenuItem.menu().addAction(item)
@@ -315,12 +316,12 @@ class MainUI(QtGui.QMainWindow, main_window_class):
             dockToolbox.menuItem = item
 
         # Load and connect tabs
-        self.tabsMenuItem.setMenu(QtGui.QMenu())
+        self.tabsMenuItem.setMenu(QMenu())
         tabItems = {}
         self.loadedTabs = []
         for tabClass in cfclient.ui.tabs.available:
             tab = tabClass(self.tabs, cfclient.ui.pluginhelper)
-            item = QtGui.QAction(tab.getMenuName(), self)
+            item = QAction(tab.getMenuName(), self)
             item.setCheckable(True)
             item.toggled.connect(tab.toggleVisibility)
             self.tabsMenuItem.menu().addAction(item)

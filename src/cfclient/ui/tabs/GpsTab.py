@@ -31,15 +31,17 @@ pre-configured.
 import logging
 
 import cfclient
-from PyQt4.QtCore import pyqtSignal
-from PyQt4.QtGui import QMessageBox
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QMessageBox
 from cfclient.ui.tab import Tab
 from cflib.crazyflie.log import LogConfig
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4 import QtNetwork
-from PyQt4 import QtWebKit
-from PyQt4 import uic
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtNetwork
+# from PyQt5 import QtWebKit
+from PyQt5.QtWebEngineWidgets import *
+from PyQt5.QtWebChannel import *
+from PyQt5 import uic
 
 __author__ = 'Bitcraze AB'
 __all__ = ['GpsTab']
@@ -71,18 +73,24 @@ class GpsTab(Tab, gps_tab_class):
         self.helper = helper
         self._cf = helper.cf
 
-        view = self.view = QtWebKit.QWebView()
+        view = self.view = QWebEngineView()
 
         cache = QtNetwork.QNetworkDiskCache()
         cache.setCacheDirectory(cfclient.config_path + "/cache")
-        view.page().networkAccessManager().setCache(cache)
-        view.page().networkAccessManager()
+        # view.page().networkAccessManager().setCache(cache)
+        # view.page().networkAccessManager()
 
-        view.page().mainFrame().addToJavaScriptWindowObject("MainWindow", self)
-        view.page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
+        # QT5
+        channel = QWebChannel(view.page())
+        view.page().setWebChannel(channel);
+        channel.registerObject("MainWindow", self)
+        # END QT5
+
+        # view.page().mainFrame().addToJavaScriptWindowObject("MainWindow", self)
+        # view.page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
         view.load(QtCore.QUrl(cfclient.module_path + "/resources/map.html"))
         view.loadFinished.connect(self.onLoadFinished)
-        view.linkClicked.connect(QtGui.QDesktopServices.openUrl)
+        # view.linkClicked.connect(QtGui.QDesktopServices.openUrl)
 
         self.map_layout.addWidget(view)
 
@@ -106,8 +114,7 @@ class GpsTab(Tab, gps_tab_class):
 
     def onLoadFinished(self):
         with open(cfclient.module_path + "/resources/map.js", 'r') as f:
-            frame = self.view.page().mainFrame()
-            frame.evaluateJavaScript(f.read())
+            frame = self.view.page().runJavaScript(f.read())
 
     @QtCore.pyqtSlot(float, float)
     def onMapMove(self, lat, lng):

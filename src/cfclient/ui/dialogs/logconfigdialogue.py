@@ -34,10 +34,10 @@ views in the UI.
 import logging
 
 import cfclient
-from PyQt4 import Qt, QtGui, uic
-from PyQt4.QtCore import *  # noqa
-from PyQt4.QtGui import *  # noqa
-from PyQt4.Qt import *  # noqa
+from PyQt5 import Qt, QtGui, uic
+from PyQt5.QtCore import *  # noqa
+from PyQt5.QtGui import *  # noqa
+from PyQt5.Qt import *  # noqa
 
 from cflib.crazyflie.log import LogConfig
 
@@ -55,7 +55,7 @@ PTYPE_FIELD = 2
 CTYPE_FIELD = 3
 
 
-class LogConfigDialogue(QtGui.QWidget, logconfig_widget_class):
+class LogConfigDialogue(QWidget, logconfig_widget_class):
 
     def __init__(self, helper, *args):
         super(LogConfigDialogue, self).__init__(*args)

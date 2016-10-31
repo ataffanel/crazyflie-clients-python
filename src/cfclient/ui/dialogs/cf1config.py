@@ -35,8 +35,9 @@ from cflib.bootloader import Bootloader
 
 import logging
 
-from PyQt4 import QtGui, uic
-from PyQt4.QtCore import pyqtSlot, pyqtSignal, QThread
+from PyQt5 import QtGui, uic
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
+from PyQt5.Qt import *  # noqa
 
 import cfclient
 from cfclient.utils.config import Config
@@ -60,7 +61,7 @@ class UIState:
     RESET = 4
 
 
-class Cf1ConfigDialog(QtGui.QWidget, service_dialog_class):
+class Cf1ConfigDialog(QWidget, service_dialog_class):
     """Tab for update the Crazyflie firmware and for reading/writing the config
     block in flash"""
 

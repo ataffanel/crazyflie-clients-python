@@ -31,9 +31,10 @@ import sys
 
 import cfclient
 import cflib.crtp
-from PyQt4 import QtGui
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSignal
+from PyQt5 import QtGui
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.Qt import *  # noqa
 
 __author__ = 'Bitcraze AB'
 __all__ = ['AboutDialog']
@@ -88,7 +89,7 @@ CREDITS_FORMAT = """
 """
 
 
-class AboutDialog(QtGui.QWidget, about_widget_class):
+class AboutDialog(QWidget, about_widget_class):
     _disconnected_signal = pyqtSignal(str)
 
     """Crazyflie client About box for debugging and information"""

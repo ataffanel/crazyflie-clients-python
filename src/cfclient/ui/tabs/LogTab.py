@@ -29,11 +29,11 @@ Shows the Log TOC of available variables in the Crazyflie.
 
 import cfclient
 from cfclient.ui.tab import Tab
-from PyQt4 import QtGui
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSignal
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtCore import Qt
+from PyQt5 import QtGui
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import Qt
 
 __author__ = 'Bitcraze AB'
 __all__ = ['LogTab']

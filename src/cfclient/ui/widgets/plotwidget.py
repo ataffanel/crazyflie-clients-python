@@ -32,16 +32,16 @@ and manipulating the plot.
 For more advanced plotting save the data and use an external application.
 """
 
-from PyQt4 import QtGui, uic
+from PyQt5 import QtGui, uic
 
 from time import time
 
 import logging
 
-from PyQt4.QtGui import QButtonGroup
-from PyQt4.QtCore import *  # noqa
-from PyQt4.QtGui import *  # noqa
-from PyQt4.Qt import *  # noqa
+from PyQt5.QtWidgets import QButtonGroup
+from PyQt5.QtCore import *  # noqa
+from PyQt5.QtGui import *  # noqa
+from PyQt5.Qt import *  # noqa
 
 import cfclient
 
@@ -108,7 +108,7 @@ class PlotItemWrapper:
         return [self.ts[start], self.ts[limit - 1]]
 
 
-class PlotWidget(QtGui.QWidget, plot_widget_class):
+class PlotWidget(QWidget, plot_widget_class):
     """Wrapper widget for PyQtGraph adding some extra buttons"""
 
     def __init__(self, parent=None, fps=100, title="", *args):

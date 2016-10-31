@@ -32,12 +32,12 @@ import logging
 
 from cfclient.ui.tab import Tab
 from cfclient.ui.widgets.plotwidget import PlotWidget
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSignal
-from PyQt4.QtCore import QAbstractItemModel
-from PyQt4.QtCore import QModelIndex
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QMessageBox
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import QAbstractItemModel
+from PyQt5.QtCore import QModelIndex
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMessageBox
 
 import cfclient
 

@@ -30,13 +30,14 @@ Attitude indicator widget.
 """
 
 import sys
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtWidgets import QApplication, QWidget
 
 __author__ = 'Bitcraze AB'
 __all__ = ['AttitudeIndicator']
 
 
-class AttitudeIndicator(QtGui.QWidget):
+class AttitudeIndicator(QWidget):
     """Widget for showing attitude"""
 
     def __init__(self):
