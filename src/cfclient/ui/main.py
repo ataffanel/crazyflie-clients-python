@@ -61,6 +61,7 @@ from PyQt5.QtWidgets import QMenu
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QTreeView, QTreeWidget, QWidget, QTextEdit
 from PyQt5.Qt import *  # noqa
+import PyQt5
 
 from .dialogs.cf1config import Cf1ConfigDialog
 from .dialogs.cf2config import Cf2ConfigDialog
@@ -129,9 +130,18 @@ class MainUI(QMainWindow, main_window_class):
     _input_discovery_signal = pyqtSignal(object)
     _log_error_signal = pyqtSignal(object, str)
 
+    def center(self):
+        frameGm = self.frameGeometry()
+        screen = PyQt5.QtWidgets.QApplication.desktop().screenNumber(PyQt5.QtWidgets.QApplication.desktop().cursor().pos())
+        centerPoint = PyQt5.QtWidgets.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
+
     def __init__(self, *args):
         super(MainUI, self).__init__(*args)
         self.setupUi(self)
+
+        self.center()
 
         ######################################################
         # By lxrocks
