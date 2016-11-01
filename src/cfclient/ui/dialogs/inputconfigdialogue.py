@@ -34,7 +34,7 @@ import cfclient
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtCore import QTimer
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QPushButton
 from cfclient.utils.config_manager import ConfigManager
 from PyQt5 import Qt
 from PyQt5 import QtGui
@@ -59,7 +59,6 @@ class InputConfigDialogue(QWidget, inputconfig_widget_class):
         self._input = joystickReader
 
         self._input_device_reader = DeviceReader(self._input)
-        self._input_device_reader.start()
 
         self._input_device_reader.raw_axis_data_signal.connect(
             self._detect_axis)
@@ -204,8 +203,8 @@ class InputConfigDialogue(QWidget, inputconfig_widget_class):
         self._mined_axis = []
         self._popup = QMessageBox()
         self._popup.directions = directions
-        self._combined_button = QtGui.QPushButton('Combined Axis Detection')
-        self.cancelButton = QtGui.QPushButton('Cancel')
+        self._combined_button = QPushButton('Combined Axis Detection')
+        self.cancelButton = QPushButton('Cancel')
         self._popup.addButton(self.cancelButton, QMessageBox.DestructiveRole)
         self._popup.setWindowTitle(caption)
         self._popup.setWindowFlags(Qt.Dialog | Qt.MSWindowsFixedSizeDialogHint)
@@ -436,24 +435,20 @@ class InputConfigDialogue(QWidget, inputconfig_widget_class):
         self._input.resume_input()
 
 
-class DeviceReader(QThread):
+class DeviceReader(QObject):
     """Used for polling data from the Input layer during configuration"""
     raw_axis_data_signal = pyqtSignal(object)
     raw_button_data_signal = pyqtSignal(object)
     mapped_values_signal = pyqtSignal(object)
 
     def __init__(self, input):
-        QThread.__init__(self)
+        QObject.__init__(self)
 
         self._input = input
         self._read_timer = QTimer()
         self._read_timer.setInterval(25)
 
-        # self.start(self._read_timer, SIGNAL("timeout()"), self._read_input)
-
-        # TOFIX: Not sure what the variable handed to timeout.connect() is meant to be...
-        tofix = self.mapped_values_signal
-        self.start(self._read_timer, self._read_timer.timeout.connect(tofix), self._read_input)
+        self._read_timer.timeout.connect(self._read_input)
 
     def stop_reading(self):
         """Stop polling data"""
