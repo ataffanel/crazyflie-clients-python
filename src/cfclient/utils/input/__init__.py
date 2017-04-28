@@ -64,6 +64,10 @@ __all__ = ['JoystickReader']
 logger = logging.getLogger(__name__)
 
 MAX_THRUST = 65000
+INITAL_TAGET_HEIGHT = 0.4
+MAX_TARGET_HEIGHT = 1.0
+MIN_TARGET_HEIGHT = 0.03
+INPUT_READ_PERIOD = 0.01
 
 
 class JoystickReader(object):
@@ -75,6 +79,7 @@ class JoystickReader(object):
 
     ASSISTED_CONTROL_ALTHOLD = 0
     ASSISTED_CONTROL_POSHOLD = 1
+    ASSISTED_CONTROL_HEIGHTHOLD = 2
 
     def __init__(self, do_device_discovery=True):
         self._input_device = None
@@ -101,6 +106,7 @@ class JoystickReader(object):
         self._old_thrust = 0
         self._old_raw_thrust = 0
         self.springy_throttle = True
+        self._target_height = INITAL_TAGET_HEIGHT
 
         self.trim_roll = Config().get("trim_roll")
         self.trim_pitch = Config().get("trim_pitch")
@@ -134,7 +140,7 @@ class JoystickReader(object):
         self._available_devices = {}
 
         # TODO: The polling interval should be set from config file
-        self._read_timer = PeriodicTimer(0.01, self.read_input)
+        self._read_timer = PeriodicTimer(INPUT_READ_PERIOD, self.read_input)
 
         if do_device_discovery:
             self._discovery_timer = PeriodicTimer(1.0,
@@ -158,6 +164,7 @@ class JoystickReader(object):
 
         self.input_updated = Caller()
         self.assisted_input_updated = Caller()
+        self.heighthold_input_updated = Caller()
         self.rp_trim_updated = Caller()
         self.emergency_stop_updated = Caller()
         self.device_discovery = Caller()
@@ -358,13 +365,25 @@ class JoystickReader(object):
                             for d in self._selected_mux.devices():
                                 d.limit_thrust = True
                                 d.limit_rp = True
-                    try:
-                        self.assisted_control_updated.call(
-                                            data.assistedControl)
-                    except Exception as e:
-                        logger.warning(
-                            "Exception while doing callback from input-device "
-                            "for assited control: {}".format(e))
+                    if self._assisted_control == \
+                            JoystickReader.ASSISTED_CONTROL_HEIGHTHOLD:
+                        try:
+                            self.assisted_control_updated.call(
+                                                data.assistedControl)
+                            if not data.assistedControl:
+                                # Reset height controller state to initial
+                                # target height both in the UI and in the
+                                # Crazyflie.
+                                # TODO: Implement a proper state update of the
+                                #       input layer
+                                self.heighthold_input_updated.\
+                                    call(0, 0,
+                                         0, INITAL_TAGET_HEIGHT)
+                        except Exception as e:
+                            logger.warning(
+                                "Exception while doing callback from "
+                                "input-device for assited "
+                                "control: {}".format(e))
 
                 if data.toggled.estop:
                     try:
@@ -385,6 +404,11 @@ class JoystickReader(object):
                     except Exception as e:
                         logger.warning("Exception while doing callback from"
                                        "input-device for alt2: {}".format(e))
+
+                # Reset height target when height-hold is not selected
+                if not data.assistedControl or self._assisted_control != \
+                        JoystickReader.ASSISTED_CONTROL_HEIGHTHOLD:
+                    self._target_height = INITAL_TAGET_HEIGHT
 
                 if self._assisted_control == \
                         JoystickReader.ASSISTED_CONTROL_POSHOLD \
@@ -412,20 +436,39 @@ class JoystickReader(object):
                         self.rp_trim_updated.call(self.trim_roll,
                                                   self.trim_pitch)
 
-                    # If we are using alt hold the data is not in a percentage
-                    if not data.assistedControl:
-                        data.thrust = JoystickReader.p2t(data.thrust)
+                    if self._assisted_control == \
+                            JoystickReader.ASSISTED_CONTROL_HEIGHTHOLD \
+                            and data.assistedControl:
+                        roll = data.roll + self.trim_roll
+                        pitch = data.pitch + self.trim_pitch
+                        yawrate = data.yaw
+                        # Scale thrust to a value between -1.0 to 1.0
+                        vz = (data.thrust - 32767) / 32767.0
+                        # Integrate velosity setpoint
+                        self._target_height += vz * INPUT_READ_PERIOD
+                        # Cap target height
+                        if self._target_height > MAX_TARGET_HEIGHT:
+                            self._target_height = MAX_TARGET_HEIGHT
+                        if self._target_height < MIN_TARGET_HEIGHT:
+                            self._target_height = MIN_TARGET_HEIGHT
+                        self.heighthold_input_updated.call(roll, -pitch,
+                                                           yawrate,
+                                                           self._target_height)
+                    else:
+                        # Using alt hold the data is not in a percentage
+                        if not data.assistedControl:
+                            data.thrust = JoystickReader.p2t(data.thrust)
 
-                    # Thrust might be <0 here, make sure it's not otherwise
-                    # we'll get an error.
-                    if data.thrust < 0:
-                        data.thrust = 0
-                    if data.thrust > 0xFFFF:
-                        data.thrust = 0xFFFF
+                        # Thrust might be <0 here, make sure it's not otherwise
+                        # we'll get an error.
+                        if data.thrust < 0:
+                            data.thrust = 0
+                        if data.thrust > 0xFFFF:
+                            data.thrust = 0xFFFF
 
-                    self.input_updated.call(data.roll + self.trim_roll,
-                                            data.pitch + self.trim_pitch,
-                                            data.yaw, data.thrust)
+                        self.input_updated.call(data.roll + self.trim_roll,
+                                                data.pitch + self.trim_pitch,
+                                                data.yaw, data.thrust)
             else:
                 self.input_updated.call(0, 0, 0, 0)
         except Exception:
