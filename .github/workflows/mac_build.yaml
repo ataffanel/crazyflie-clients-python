@@ -4,7 +4,7 @@ name: Mac build
 # events but only for the master branch
 on:
   push:
-    branches: [ master, dev_action ]
+    branches: [ master, dev-action ]
   pull_request:
     branches: [ master ]
 
