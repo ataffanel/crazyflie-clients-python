@@ -31,11 +31,13 @@ jobs:
         run: python3 setup.py bdist_mac
       
       - name: Archive app
-        run: zip -r "build/Crazyflie client.zip" "build/Crazyflie client.app"
+        run: |
+          export VERSION=$(pip3 list | grep cfclient | awk '{print $2}')
+          zip -r "build/cfclient_$VERSION.zip" "build/Crazyflie client.app"
       
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v2.1.4
         with:
           name: "Crazyflie client"
-          path: "build/Crazyflie client.zip"
+          path: "build/*.zip"
 
